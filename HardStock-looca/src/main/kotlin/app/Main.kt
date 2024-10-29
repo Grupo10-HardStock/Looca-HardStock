@@ -11,7 +11,8 @@ open class Main {
             teste.configurar()
             while (true) {
                 try {
-                    if (teste.inserir()) {
+                    if (teste.inserirBytesEnviados()) {
+                        teste.inserirBytesRecebidos()
                         println("Dados inseridos com sucesso.")
                     } else {
                         println("Nenhum dado inserido.")

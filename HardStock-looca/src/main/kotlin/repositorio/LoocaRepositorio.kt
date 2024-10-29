@@ -11,9 +11,9 @@ class LoocaRepositorio {
     fun configurar() {
         val dataSource = BasicDataSource()
         dataSource.driverClassName = "com.mysql.cj.jdbc.Driver"
-        dataSource.url = "jdbc:mysql://localhost:3306/looca?serverTimezone=America/Sao_Paulo"
+        dataSource.url = "jdbc:mysql://34.205.36.110:3306/HardStock?serverTimezone=America/Sao_Paulo"
         dataSource.username = "root"
-        dataSource.password = "#Gf38851238863"
+        dataSource.password = "urubu100"
 
         jdbcTemplate = JdbcTemplate(dataSource)
     }
@@ -34,21 +34,16 @@ class LoocaRepositorio {
         )
     }
 
-    fun inserir(): Boolean {
+    fun inserirBytesEnviados(): Boolean {
         val rede = loocaInserir.capturarDados()
         if (rede != null) {
             return try {
                 val qtdLinhasAfetadas = jdbcTemplate.update(
                     """
-                INSERT INTO monitoramento_rede (bytes_enviados, bytes_recebidos, pacotes_enviados, pacotes_recebidos, bytes_enviados_mb, bytes_recebidos_mb)
-                VALUES (?, ?, ?, ?, ?, ?)
-            """.trimIndent(),
-                    rede.bytesEnviados,
-                    rede.bytesRecebidos,
-                    rede.pacotesEnviados,
-                    rede.pacotesRecebidos,
-                    rede.bytesEnviados / (1024 * 1024),
-                    rede.bytesRecebidos / (1024 * 1024)
+                INSERT INTO Capturas (fkServidor, valor, fkComponente)
+                VALUES (1, ?, (SELECT idComponente FROM Componentes WHERE nome = 'Bytes Enviados'))
+                """.trimIndent(),
+                    rede.bytesEnviados
                 )
                 qtdLinhasAfetadas > 0
             } catch (e: Exception) {
@@ -60,5 +55,31 @@ class LoocaRepositorio {
             return false
         }
     }
+
+
+
+    fun inserirBytesRecebidos(): Boolean {
+        val rede = loocaInserir.capturarDados()
+        if (rede != null) {
+            return try {
+                val qtdLinhasAfetadas = jdbcTemplate.update(
+                    """
+                INSERT INTO Capturas (fkServidor, valor, fkComponente)
+                VALUES (1, ?, (SELECT idComponente FROM Componentes WHERE nome = 'Bytes Recebidos'))
+                """.trimIndent(),
+                    rede.bytesRecebidos
+                )
+                qtdLinhasAfetadas > 0
+            } catch (e: Exception) {
+                println("Erro ao inserir dados: ${e.message}")
+                false
+            }
+        } else {
+            println("Nenhuma interface de conexão principal encontrada.")
+            return false
+        }
+    }
+
+
 
 }
